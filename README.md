@@ -15,6 +15,22 @@ pip install dom-cli
 
 ---
 
+## Prerequisites
+
+Before using the `dom` CLI, you need to set up your DigitalOcean API token.  
+Export the `DIGITALOCEAN_TOKEN` environment variable with your token, ensuring it has the following permissions:
+
+- **actions**: read
+- **block_storage**: read, delete, create
+- **block_storage_action**: read, create
+- **droplet**: read, update, delete, create
+- **regions**: read
+- **sizes**: read
+- **tag**: create, read, delete
+- **ssh_key**: read
+
+---
+
 ## Usage
 
 The general syntax of the `dom` command is:
