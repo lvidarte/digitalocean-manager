@@ -24,7 +24,7 @@ setup(
     long_description=open('README.md').read(),  # Use a README for long description
     long_description_content_type='text/markdown',  # README is markdown
     author='The Cloutfit Team',
-    author_email='dev@cloutfit.com',
+    author_email='lvidarte@gmail.com',
     url='https://github.com/cloutfit/digitalocean-manager',
     packages=find_packages(),  # Automatically finds the packages in your project
     install_requires=[  # List any dependencies here
