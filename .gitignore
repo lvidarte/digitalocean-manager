@@ -4,6 +4,7 @@ venv/
 .venv/
 env/
 *.env
+.pypi_env/
 
 # Python artifacts
 *.pyc
