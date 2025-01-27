@@ -20,6 +20,18 @@ from digitalocean_manager.reader import dict_from_file
 
 
 class Config:
+    """
+    Singleton class for managing configuration settings.
+
+    This class follows the Singleton design pattern, ensuring only one instance
+    of the Config class exists throughout the application. It handles reading configuration
+    settings either from environment variables or a configuration file.
+
+    Attributes:
+        _instance (Config): The single instance of the Config class.
+        _initialized (bool): Flag to ensure the configuration is only initialized once.
+        _config (dict): The configuration settings loaded from the file.
+    """
     _instance = None
     _initialized = False
 
@@ -45,11 +57,26 @@ class Config:
     def __init__(self):
         """Initializes the Config instance."""
         if not Config._initialized:
-            Config._initialized = True
             self._read_config_file()
+            Config._initialized = True
     
     def __getattr__(self, name):
-        """Handles accessing environment variables and config file settings."""
+        """
+        Handles accessing environment variables and config file settings.
+
+        If the requested attribute is uppercase, it checks for an environment
+        variable with that name. If not found, it checks the loaded config file.
+
+        Args:
+            name (str): The name of the attribute being accessed.
+
+        Returns:
+            str: The value of the environment variable or config setting.
+
+        Raises:
+            ValueError: If the environment variable is not set.
+            AttributeError: If the config setting is not found.
+        """
         if name.isupper(): # From ENV Variables
             if os.getenv(name):
                 return os.getenv(name)
@@ -61,13 +88,23 @@ class Config:
             raise AttributeError(f"{self.__class__.__name__} attribute '{name}' is not set.")
     
     def _read_config_file(self) -> dict:
-        """Reads the config file from disk."""
+        """
+        Reads the config file from disk.
+
+        This method loads the configuration settings from the specified
+        config file. If the file is missing or an error occurs, an error message
+        is printed and the program exits.
+
+        Raises:
+            FileNotFoundError: If the config file is missing.
+            Exception: For other errors while reading the config file.
+        """
         try:
             self._config = dict_from_file(basedir='.', filename=ProjectPaths.CONFIG_FILENAME)
         except FileNotFoundError:
-            print(f"Missing file {ProjectPaths.CONFIG_FILENAME}.")
-            print(f"Are you alreday created the project with `dom init`?")
-            print(f"If so, are you working in the root dir of your project?")
+            print(f"Error: Missing {ProjectPaths.CONFIG_FILENAME} file.")
+            print("Have you created the project using `dom init`?")
+            print("If yes, make sure you're in the root directory of your project.")
             sys.exit(1)
         except Exception as e:
             print(e)

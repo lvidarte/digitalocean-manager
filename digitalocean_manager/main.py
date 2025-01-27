@@ -47,12 +47,12 @@ def droplet():
 
 
 @droplet.command()
-@click.argument("template_name")
-@click.argument("droplet_name")
+@click.argument("template_name", type=str)
+@click.argument("droplet_name", type=str)
 @click.option("-k", "--key", "keys", multiple=True, help="SSH key ID to attach to the droplet.")
 @click.option("-v", "--volume-id", "volumes", multiple=True, help="Volume ID to attach to the droplet.")
 @click.option("-t", "--tag", "tags", multiple=True, help="Tag to attach to the droplet.")
-@click.option("-c", "--cloud-config", "cloud_config", help="Cloud config filename to attach to the droplet.")
+@click.option("-c", "--cloud-config", "cloud_config", help="Cloud config name (filename without .yaml) to attach to the droplet.")
 @click.option("--dry-run", default=False, is_flag=True, help="Shows the data will send to DigitalOcean without perform any request.")
 def create(
     template_name: str,
@@ -134,8 +134,8 @@ def volume():
 
 
 @volume.command()
-@click.argument("template_name")
-@click.argument("volume_name")
+@click.argument("template_name", type=str)
+@click.argument("volume_name", type=str)
 @click.option("-t", "--tag", "tags", multiple=True, help="Tag to attach to the droplet.")
 @click.option("--dry-run", default=False, is_flag=True, help="Shows the data will send to DigitalOcean without perform any request.")
 def create(template_name: str, volume_name: str, tags: tuple, dry_run: bool):
@@ -145,8 +145,8 @@ def create(template_name: str, volume_name: str, tags: tuple, dry_run: bool):
 
 
 @volume.command()
-@click.argument("volume_name")
-@click.argument("droplet_id")
+@click.argument("volume_name", type=str)
+@click.argument("droplet_id", type=int)
 def attach(volume_name: str, droplet_id: int):
     """Attach a volume to a droplet."""
     from digitalocean_manager.managers.volume import VolumeManager
@@ -154,8 +154,8 @@ def attach(volume_name: str, droplet_id: int):
 
 
 @volume.command()
-@click.argument("volume_name")
-@click.argument("droplet_id")
+@click.argument("volume_name", type=str)
+@click.argument("droplet_id", type=int)
 def detach(volume_name: str, droplet_id: int):
     """Detach a volume from a droplet."""
     from digitalocean_manager.managers.volume import VolumeManager
@@ -163,7 +163,7 @@ def detach(volume_name: str, droplet_id: int):
 
 
 @volume.command()
-@click.argument("volume_id")
+@click.argument("volume_id", type=str)
 def delete(volume_id: str):
     """Delete a volume by id."""
     from digitalocean_manager.managers.volume import VolumeManager
@@ -178,7 +178,7 @@ def list():
 
 
 @volume.command()
-@click.argument("volume_id")
+@click.argument("volume_id", type=str)
 def info(volume_id: str):
     """Get information about a volume."""
     from digitalocean_manager.managers.volume import VolumeManager
@@ -234,8 +234,8 @@ def action():
 
 
 @action.command()
-@click.argument("action_id")
-def info(action_id):
+@click.argument("action_id", type=int)
+def info(action_id: int):
     """Get information about an action_id."""
     from digitalocean_manager.managers.action import ActionManager
     ActionManager().info(action_id)

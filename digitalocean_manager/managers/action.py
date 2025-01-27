@@ -20,13 +20,39 @@ from digitalocean_manager.client import DigitalOceanClient
 
 
 class ActionManager:
+    """
+    A class to manage and track actions in DigitalOcean.
+
+    Attributes:
+        config (Config): Configuration object to handle settings and configurations.
+        client (Client): DigitalOcean API client instance.
+    """
 
     def __init__(self):
+        """
+        Initialize the ActionManager with configuration and client.
+
+        Sets up the necessary client and configuration for managing actions.
+        """
         self.config = Config()
         self.client = DigitalOceanClient().get_client()
 
     def info(self, action_id: int) -> str:
-        """Get raw information about an action."""
+        """
+        Get raw information about an action.
+
+        Args:
+            action_id (int): The ID of the action to retrieve information for.
+
+        Returns:
+            str: A JSON-formatted string containing information about the action.
+
+        Raises:
+            Exception: If there is an error retrieving the action info.
+
+        This method retrieves and prints detailed information about a specific action
+        using the provided action ID. The result is displayed in a formatted JSON string.
+        """
         try:
             resp = self.client.actions.get(action_id)
             if 'action' in resp:
@@ -37,7 +63,18 @@ class ActionManager:
             print(f"Error getting action info: {e}")
     
     def ping(self, action_id: int) -> str:
-        """Ping the status of an action until it is completed."""
+        """
+        Ping the status of an action until it is completed.
+
+        Args:
+            action_id (int): The ID of the action to ping.
+
+        Raises:
+            Exception: If there is an error checking the action status.
+
+        This method continuously checks the status of the specified action at regular intervals
+        until the action is either completed or errored out. It prints the action details each time.
+        """
         while True:
             time.sleep(self.config.ping_interval)
             resp = self.client.actions.get(action_id)
@@ -50,7 +87,15 @@ class ActionManager:
                 break
         
     def display(self, action: dict) -> None:
-        """Display action information."""
+        """
+        Display information about an action.
+
+        Args:
+            action (dict): The action object containing details about the action.
+
+        This method prints key information about the action, including its ID, status,
+        type, and timestamps for when it started and completed.
+        """
         print(
             f"ActionID: {action['id']}, "
             f"Status: {action['status']}, "

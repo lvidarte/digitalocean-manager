@@ -20,7 +20,20 @@ import yaml
 
 
 def read_file(basedir: str, filename: str) -> str:
-    """Read file and returns plain text."""
+    """
+    Reads a file from the specified directory and returns its content as plain text.
+
+    Args:
+        basedir (str): The base directory where the file is located.
+        filename (str): The name of the file to read.
+
+    Returns:
+        str: The content of the file as a string.
+
+    Raises:
+        FileNotFoundError: If the file does not exist in the specified directory.
+        Exception: If an error occurs while reading the file.
+    """
     try:
         filepath = os.path.join(os.getcwd(), basedir, filename)
         with open(filepath, 'r') as f:
@@ -32,7 +45,21 @@ def read_file(basedir: str, filename: str) -> str:
 
 
 def dict_from_file(basedir: str, filename: str) -> dict:
-    """Read the config json/yaml file and converts it to dict."""
+    """
+    Reads a JSON or YAML file from the specified directory and converts its content to a dictionary.
+
+    Args:
+        basedir (str): The base directory where the file is located.
+        filename (str): The name of the file to read. Must end with '.json' or '.yaml'.
+
+    Returns:
+        dict: The content of the file as a dictionary.
+
+    Raises:
+        ValueError: If the file format is unsupported (not '.json' or '.yaml').
+        FileNotFoundError: If the file does not exist in the specified directory.
+        Exception: If an error occurs while reading or parsing the file.
+    """
     if filename.endswith('json'):
         return json.loads(read_file(basedir, filename))
     elif filename.endswith('yaml'):
