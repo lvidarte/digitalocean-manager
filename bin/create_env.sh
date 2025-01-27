@@ -3,7 +3,7 @@
 set -e 
 
 # Define the virtual environment directory
-VENV_DIR=".venv"
+VENV_DIR=".dom_env"
 
 # Check if the .venv directory exists
 if [ ! -d "$VENV_DIR" ]; then
