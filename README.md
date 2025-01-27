@@ -107,10 +107,10 @@ Example of droplet creation using the `nvidia-h100` template:
 dom droplet create nvidia-h100 ai-tasks-01 \
   --key [some key id] \
   --volume [some volume id] \
-  --cloud-config my-cloud-init.yaml
+  --cloud-config name-of-my-cloud-init
 ```
 
-The above command creates a droplet with all the configurations and scripts needed for running AI tasks on GPU droplets, using a cloud-init file (`my-cloud-init.yaml`) defined under the `cloud-configs/` directory.
+The above command creates a droplet with all the configurations and scripts needed for running AI tasks on GPU droplets, using a cloud-init file (`name-of-my-cloud-init.yaml`) defined under the `cloud-configs/` directory.
 
 ### Volume Management
 
