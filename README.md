@@ -70,9 +70,12 @@ The `config.yaml` file contains the main configuration for the project. Below is
 digitalocean_region: nyc2
 
 # List of (int) protected droplets IDs.
+# You can't stop/delete a protected droplet.
+# You can't detach a volume from a protected droplet.
 protected_droplets: []
 
 # List of (str) protected volumes IDs.
+# You can't delete a protected volume.
 protected_volumes: []
 
 # JSON indentation level (int) for raw outputs.
