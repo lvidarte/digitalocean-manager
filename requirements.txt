@@ -1,4 +1,5 @@
 click==8.1.8
 paramiko==3.5.0
 pydo==0.7.0
+pytest==8.3.4
 PyYAML==6.0.2

@@ -3,7 +3,7 @@
 set -e 
 
 # Define the virtual environment directory
-VENV_DIR=".dom_env"
+VENV_DIR=".env"
 
 # Check if the .venv directory exists
 if [ ! -d "$VENV_DIR" ]; then
@@ -29,8 +29,8 @@ if [ ! -d "$VENV_DIR" ]; then
     # Check if requirements.txt exists and install dependencies
     if [ -f "requirements.txt" ]; then
         echo "Installing dependencies from requirements.txt..."
-        pip install --upgrade pip
-        pip install -r requirements.txt
+        python3 -m pip install --upgrade pip
+        python3 -m pip install -r requirements.txt
         if [ $? -ne 0 ]; then
             echo "Error: Failed to install dependencies."
             deactivate
