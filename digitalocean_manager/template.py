@@ -46,9 +46,9 @@ def droplet_template(
     droplet = dict_from_file(ProjectPaths.DROPLETS_DIR, f'{template_name}.json')
     droplet['name'] = droplet_name
     droplet['region'] = config.digitalocean_region
-    droplet['ssh_keys'] = list(keys) if keys else droplet.get('ssh_keys', [])
-    droplet['volumes'] = list(volumes) if volumes else droplet.get('volumes', [])
-    droplet['tags'] = list(tags) if tags else droplet.get('tags', [])
+    droplet['ssh_keys'] = droplet.get('ssh_keys', []) + list(keys) if keys else droplet.get('ssh_keys', [])
+    droplet['volumes'] = droplet.get('volumes', []) + list(volumes) if volumes else droplet.get('volumes', [])
+    droplet['tags'] = droplet.get('tags', []) + list(tags) if tags else droplet.get('tags', [])
     droplet['user_data'] = cloud_config_file(cloud_config_name) if cloud_config_name else ''
     return droplet
 
@@ -72,7 +72,7 @@ def volume_template(
     volume = dict_from_file(ProjectPaths.VOLUMES_DIR, f'{template_name}.json')
     volume['name'] = volume_name
     volume['region'] = config.digitalocean_region
-    volume['tags'] = list(tags) if tags else volume.get('tags', [])
+    volume['tags'] = volume.get('tags', []) + list(tags) if tags else volume.get('tags', [])
     return volume
 
 
