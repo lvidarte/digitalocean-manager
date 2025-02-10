@@ -15,15 +15,28 @@
 import os
 import pytest
 import sys
-from unittest.mock import patch, MagicMock
-from digitalocean_manager.config import Config
+from unittest.mock import patch
+
+
+MODULE_NAME = "digitalocean_manager.config"
+
+
+@pytest.fixture(autouse=True)
+def reset_config_instance():
+    """Fixture to reset the Config instance."""
+    # Check if the module is already loaded and remove it from sys.modules
+    if MODULE_NAME in sys.modules:
+        print('[removing config module]', end=' ')
+        del sys.modules[MODULE_NAME]
+
+    yield
 
 
 @pytest.fixture
 def mock_dict_from_file():
     """Fixture to mock the dict_from_file function."""
     with patch("digitalocean_manager.config.dict_from_file") as mock_func:
-        mock_func.return_value = {"DIGITALOCEAN_TOKEN": "fake-token", "json_indent": 2}
+        mock_func.return_value = {"json_indent": 2}
         yield mock_func
 
 
@@ -43,6 +56,8 @@ def mock_project_paths():
 
 def test_config_singleton(mock_dict_from_file, mock_project_paths):
     """Test that Config follows the singleton pattern."""
+    from digitalocean_manager.config import Config
+
     config1 = Config()
     config2 = Config()
     
@@ -51,13 +66,17 @@ def test_config_singleton(mock_dict_from_file, mock_project_paths):
 
 def test_config_reads_from_env(mock_dict_from_file, mock_env, mock_project_paths):
     """Test that Config retrieves environment variables correctly."""
+    from digitalocean_manager.config import Config
+
     config = Config()
     
     assert config.DIGITALOCEAN_TOKEN == "env-token"  # Env variable should take priority
 
 
-def test_config_reads_from_file(mock_dict_from_file, mock_project_paths):
-    """Test that Config retrieves values from the config file when no env variable is set."""
+def test_config_reads_from_file(mock_dict_from_file, mock_env, mock_project_paths):
+    """Test that Config retrieves values from the config file."""
+    from digitalocean_manager.config import Config
+
     config = Config()
     
     assert config.json_indent == 2  # Value from dict_from_file
@@ -65,6 +84,8 @@ def test_config_reads_from_file(mock_dict_from_file, mock_project_paths):
 
 def test_config_missing_env_variable(mock_dict_from_file, mock_project_paths):
     """Test that accessing a missing environment variable raises ValueError."""
+    from digitalocean_manager.config import Config
+
     config = Config()
 
     with pytest.raises(ValueError) as exc_info:
@@ -75,6 +96,8 @@ def test_config_missing_env_variable(mock_dict_from_file, mock_project_paths):
 
 def test_config_missing_config_attribute(mock_dict_from_file, mock_project_paths):
     """Test that accessing a missing config file attribute raises ValueError (not AttributeError)."""
+    from digitalocean_manager.config import Config
+
     config = Config()
     
     with pytest.raises(ValueError) as exc_info:

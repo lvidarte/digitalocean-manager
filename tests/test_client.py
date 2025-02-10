@@ -14,7 +14,8 @@
 
 import json
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
 from digitalocean_manager.client import DigitalOceanClient
 
 

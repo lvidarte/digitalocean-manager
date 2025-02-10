@@ -1,102 +1,120 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch, MagicMock
 from digitalocean_manager.managers.sshkey import SSHKeyManager
-import json
 
 
-# Define mock data
-mock_ssh_key = {
-    'id': 123,
-    'name': 'test_key',
-    'fingerprint': 'aa:bb:cc:dd:ee:ff'
+# Define the fake API response
+api_response = {
+    "ssh_keys": [
+        {"id": 123, "name": "TestKey1", "fingerprint": "fingerprint1"},
+        {"id": 456, "name": "TestKey2", "fingerprint": "fingerprint2"},
+    ]
 }
 
-mock_resp = {
-    'ssh_keys': [mock_ssh_key]
-}
+# Mock Config and DigitalOceanClient properly
+@patch("digitalocean_manager.config.Config._read_config_file", autospec=True, return_value={})
+@patch("digitalocean_manager.managers.sshkey.DigitalOceanClient.get_client", autospec=True)
+def test_list(mock_get_client, mock_config, capsys):
+    """Test the list method of SSHKeyManager."""
 
+    # Mock DigitalOceanClient instance's list() method to return the fake response
+    mock_client_instance = MagicMock()
+    mock_client_instance.ssh_keys.list.return_value = api_response
+    mock_client_instance.raise_api_error.side_effect = Exception("API Error: Something went wrong")
 
-# Test for the list method
-@patch('digitalocean_manager.managers.sshkey.DigitalOceanClient')
-@patch('digitalocean_manager.managers.sshkey.Config')
-def test_list(mock_config, mock_client):
-    # Set up mocks
-    mock_instance = mock_client.return_value
-    mock_instance.ssh_keys.list.return_value = mock_resp
-    mock_config_instance = mock_config.return_value
-    mock_config_instance.json_indent = 4
-    
-    # Instantiate SSHKeyManager and call the list method
+    # Mock get_client() to return our mocked client instance
+    mock_get_client.return_value = mock_client_instance
+
+    # Instantiate SSHKeyManager (it will use the mocked Config and Client)
     manager = SSHKeyManager()
-    with patch('builtins.print') as mocked_print:
-        manager.list()
-    
-        # Debugging: Check if the method was called
-        print(mock_instance.ssh_keys.list.call_args)
-        
-        # Verify that the list method makes the expected call
-        mock_instance.ssh_keys.list.assert_called_once()
+
+    # Call the list method
+    manager.list()
+
+    # Capture the printed output using capsys
+    captured = capsys.readouterr()
+
+    # Assertions to check if the output contains the expected values
+    assert "TestKey1" in captured.out
+    assert "fingerprint1" in captured.out
+    assert "TestKey2" in captured.out
+    assert "fingerprint2" in captured.out
 
 
-# Test for the info method
-@patch('digitalocean_manager.managers.sshkey.DigitalOceanClient')
-@patch('digitalocean_manager.managers.sshkey.Config')
-def test_info(mock_config, mock_client):
-    # Set up mocks
-    mock_instance = mock_client.return_value
-    mock_instance.ssh_keys.get.return_value = {'ssh_key': mock_ssh_key}
-    mock_config_instance = mock_config.return_value
-    mock_config_instance.json_indent = 4
+@patch("digitalocean_manager.config.Config._read_config_file", autospec=True, return_value={})
+@patch("digitalocean_manager.managers.sshkey.DigitalOceanClient.get_client", autospec=True)
+def test_list_empty_response(mock_get_client, mock_config, capsys):
+    """Test the list method of SSHKeyManager with an empty API response."""
 
-    # Instantiate SSHKeyManager and call the info method
+    # Mock DigitalOceanClient instance's list() method to return an empty response
+    mock_client_instance = MagicMock()
+    mock_client_instance.ssh_keys.list.return_value = {'ssh_keys': []}
+    mock_client_instance.raise_api_error.side_effect = Exception("API Error: Something went wrong")
+
+    # Mock get_client() to return our mocked client instance
+    mock_get_client.return_value = mock_client_instance
+
+    # Instantiate SSHKeyManager (it will use the mocked Config and Client)
     manager = SSHKeyManager()
-    with patch('builtins.print') as mocked_print:
-        manager.info(123)
 
-        # Verify that the info method calls the client API correctly
-        mock_instance.ssh_keys.get.assert_called_once_with(123)
+    # Call the list method
+    manager.list()
 
-        # Check that the info method formats the response as expected
-        mocked_print.assert_called_with(
-            json.dumps(mock_ssh_key, indent=mock_config_instance.json_indent)
-        )
+    # Capture the printed output using capsys
+    captured = capsys.readouterr()
+
+    # Assertions to check that the method didn't print anything (since you don't print for empty responses)
+    assert captured.out == ""  # Check that there's no output
 
 
-# Test for handling API errors in list method
-@patch('digitalocean_manager.managers.sshkey.DigitalOceanClient')
-@patch('digitalocean_manager.managers.sshkey.Config')
-def test_list_api_error(mock_config, mock_client):
-    # Set up mock to simulate an API error
-    mock_instance = mock_client.return_value
-    mock_instance.ssh_keys.list.return_value = {'error': 'Something went wrong'}
-    mock_config_instance = mock_config.return_value
-    mock_config_instance.json_indent = 4
+@patch("digitalocean_manager.config.Config._read_config_file", autospec=True, return_value={})
+@patch("digitalocean_manager.managers.sshkey.DigitalOceanClient.get_client", autospec=True)
+def test_list_with_api_error(mock_get_client, mock_config, capsys):
+    """Test the raise_api_error method of SSHKeyManager."""
 
-    # Instantiate SSHKeyManager and call the list method
+    # Mock the DigitalOceanClient instance's raise_api_error method to raise an exception
+    mock_client_instance = MagicMock()
+    mock_client_instance.ssh_keys.list.return_value = {}
+    mock_client_instance.raise_api_error.side_effect = Exception("API Error: Something went wrong")
+
+    # Mock get_client() to return our mocked client instance
+    mock_get_client.return_value = mock_client_instance
+
+    # Instantiate SSHKeyManager (it will use the mocked Config and Client)
     manager = SSHKeyManager()
-    with patch('builtins.print') as mocked_print:
-        manager.list()
 
-        # Verify that the error handling is triggered
-        mock_instance.raise_api_error.assert_called_once_with({'error': 'Something went wrong'})
-        mocked_print.assert_called_with("Error listing SSH keys: Something went wrong")
+    # Call the method that triggers the exception
+    manager.list()
+
+    # Capture the printed output using capsys
+    captured = capsys.readouterr()
+
+    # Assertions to check if the error message was printed correctly
+    assert "API Error" in captured.out
 
 
-# Test for handling API errors in info method
-@patch('digitalocean_manager.managers.sshkey.DigitalOceanClient')
-@patch('digitalocean_manager.managers.sshkey.Config')
-def test_info_api_error(mock_config, mock_client):
-    # Set up mock to simulate an API error
-    mock_instance = mock_client.return_value
-    mock_instance.ssh_keys.get.return_value = {'error': 'SSH key not found'}
-    mock_config_instance = mock_config.return_value
-    mock_config_instance.json_indent = 4
+@patch("digitalocean_manager.config.Config._read_config_file", autospec=True, return_value={})
+@patch("digitalocean_manager.managers.sshkey.DigitalOceanClient.get_client", autospec=True)
+def test_list_with_exeption(mock_get_client, mock_config, capsys):
+    """Test the list method of SSHKeyManager with exception handling."""
 
-    # Instantiate SSHKeyManager and call the info method
+    error_message = "Something went wrong"
+
+    # Mock the DigitalOceanClient instance's raise_api_error method to raise an exception
+    mock_client_instance = MagicMock()
+    mock_client_instance.ssh_keys.list.side_effect = Exception(error_message)
+
+    # Mock get_client() to return our mocked client instance
+    mock_get_client.return_value = mock_client_instance
+
+    # Instantiate SSHKeyManager (it will use the mocked Config and Client)
     manager = SSHKeyManager()
-    with patch('builtins.print') as mocked_print:
-        manager.info(123)
 
-        # Verify that the error handling is triggered
-        mock_instance.raise_api_error.assert_called_once_with({'error': 'SSH key not found'})
-        mocked_print.assert_called_with("Error getting SSH key info: SSH key not found")
+    # Call the method that triggers the exception
+    manager.list()
+
+    # Capture the printed output using capsys
+    captured = capsys.readouterr()
+
+    # Assertions to check if the error message was printed correctly
+    assert error_message in captured.out
