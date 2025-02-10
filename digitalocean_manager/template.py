@@ -46,9 +46,9 @@ def droplet_template(
     droplet = dict_from_file(ProjectPaths.DROPLETS_DIR, f'{template_name}.json')
     droplet['name'] = droplet_name
     droplet['region'] = config.digitalocean_region
-    droplet['ssh_keys'] = droplet.get('ssh_keys', []) + list(keys) if keys else droplet.get('ssh_keys', [])
-    droplet['volumes'] = droplet.get('volumes', []) + list(volumes) if volumes else droplet.get('volumes', [])
-    droplet['tags'] = droplet.get('tags', []) + list(tags) if tags else droplet.get('tags', [])
+    droplet['ssh_keys'] = merge_unique_items(droplet.get('ssh_keys', []), keys)
+    droplet['volumes'] = merge_unique_items(droplet.get('volumes', []), volumes)
+    droplet['tags'] = merge_unique_items(droplet.get('tags', []), tags)
     droplet['user_data'] = cloud_config_file(cloud_config_name) if cloud_config_name else ''
     return droplet
 
@@ -72,8 +72,25 @@ def volume_template(
     volume = dict_from_file(ProjectPaths.VOLUMES_DIR, f'{template_name}.json')
     volume['name'] = volume_name
     volume['region'] = config.digitalocean_region
-    volume['tags'] = volume.get('tags', []) + list(tags) if tags else volume.get('tags', [])
+    volume['tags'] = merge_unique_items(volume.get('tags', []), tags)
     return volume
+
+
+def merge_unique_items(existing_items: list, new_items: tuple) -> list:
+    """Merge a list and a tuple while ensuring unique elements.
+
+    This function takes an existing list and a tuple with new items,
+    merges them while removing duplicates, and returns a new list
+    with unique elements.
+
+    Args:
+        existing_items (list): The original list of items.
+        new_items (tuple or None): New items to be added. If None, the original list is returned.
+
+    Returns:
+        list: A merged list containing unique elements from both inputs.
+    """
+    return list(set(existing_items + list(new_items) if new_items else existing_items))
 
 
 def cloud_config_file(name: str) -> str:
