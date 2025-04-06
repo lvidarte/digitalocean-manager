@@ -242,6 +242,43 @@ def info(action_id: int):
 
 
 """
+Reserved IP subcommands
+
+The `ip` command group has the following subcommands:
+- list: List all reserved IPs.
+- assign: Assign a reserved IP to a droplet.
+"""
+@cli.group()
+def ip():
+    """Manage reserved IPs."""
+    pass
+
+
+@ip.command()
+def list():
+    """List all reserved IPs."""
+    from digitalocean_manager.managers.ip import IPManager
+    IPManager().list()
+
+
+@ip.command()
+@click.argument("reserved_ip", type=str)
+@click.argument("droplet_id", type=int)
+def assign(reserved_ip: str, droplet_id: int):
+    """Assign a reserved IP to a droplet."""
+    from digitalocean_manager.managers.ip import IPManager
+    IPManager().assign(reserved_ip, droplet_id)
+
+
+@ip.command()
+@click.argument("reserved_ip", type=str)
+def unassign(reserved_ip: str):
+    """Unassign a reserved IP from a droplet."""
+    from digitalocean_manager.managers.ip import IPManager
+    IPManager().unassign(reserved_ip)
+
+
+"""
 Program version
 """
 @cli.command()

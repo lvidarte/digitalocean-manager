@@ -1,4 +1,3 @@
-
 # DigitalOcean Manager (DOM) CLI
 
 `dom` is a command-line tool to manage your DigitalOcean resources. From GPU droplets to volumes, it provides an intuitive interface to simplify your cloud management tasks, especially for AI workloads.
@@ -25,9 +24,10 @@ Export the `DIGITALOCEAN_TOKEN` environment variable with your token, ensuring i
 - **block_storage_action**: read, create
 - **droplet**: read, update, delete, create
 - **regions**: read
+- **reserved_ip**: read, update
 - **sizes**: read
-- **tag**: create, read, delete
 - **ssh_key**: read
+- **tag**: create, read, delete
 
 ---
 
@@ -105,23 +105,66 @@ Example of droplet creation using the `nvidia-h100` template:
 
 ```bash
 dom droplet create nvidia-h100 ai-tasks-01 \
-  --key [some key id] \
-  --volume [some volume id] \
+  --key [ssh_key_id_1] --key [ssh_key_id_2] \
+  --volume [volume_id_1] --volume [volume_id_2] \
+  --tag production --tag web-server \
   --cloud-config name-of-my-cloud-init
 ```
 
-The above command creates a droplet with all the configurations and scripts needed for running AI tasks on GPU droplets, using a cloud-init file (`name-of-my-cloud-init.yaml`) defined under the `cloud-configs/` directory.
+The above command creates a droplet named `ai-tasks-01` using the `nvidia-h100` template. It attaches specified SSH keys and volumes, adds tags, and applies a cloud-init configuration (`name-of-my-cloud-init.yaml` located in `cloud-configs/`).
+
+#### Start/Stop a Droplet
+
+```bash
+# Stop a droplet
+dom droplet stop [droplet_id]
+
+# Start a droplet
+dom droplet start [droplet_id]
+```
+
+#### Delete a Droplet
+
+```bash
+dom droplet delete [droplet_id]
+```
+*Note: Protected droplets cannot be deleted.*
+
+#### List Droplets
+
+```bash
+# List all droplets (CPU and GPU)
+dom droplet list
+
+# List only GPU droplets
+dom droplet list --droplet-type gpu
+
+# List only CPU droplets
+dom droplet list --droplet-type cpu
+```
+
+#### Get Droplet Information
+
+```bash
+dom droplet info [droplet_id]
+```
+
+#### List Droplet Templates
+
+```bash
+dom droplet templates
+```
+This lists available templates defined in the `droplets/` directory.
 
 ### Volume Management
 
 `dom` also supports creating and managing volumes for storing data, such as AI models.
 
-#### Example: Create a Volume
+#### Create a Volume
 
-Example using the `models.json` configuration file:
+Example using the `models.json` configuration file (contents shown below):
 
-```bash
-cat volumes/models.json 
+```json
 {
     "name": null,
     "size_gigabytes": 100,
@@ -130,11 +173,110 @@ cat volumes/models.json
     "filesystem_type": "ext4",
     "filesystem_label": "models"
 }
-
-dom volume create models aimodels
 ```
 
-This creates a volume named `aimodels` with a size of 100GB, formatted with the `ext4` filesystem, and labeled as `models`. The volume can then be shared across multiple droplet instances.
+```bash
+# Create volume using the 'models' template and name it 'aimodels'
+dom volume create models aimodels --tag database --tag critical
+```
+
+This creates a volume named `aimodels` based on the `models` template, applies the specified tags, and uses settings from `config.yaml` (like region).
+
+#### Attach/Detach a Volume
+
+```bash
+# Attach volume 'my-volume-name' to droplet [droplet_id]
+dom volume attach my-volume-name [droplet_id]
+
+# Detach volume 'my-volume-name' from droplet [droplet_id]
+dom volume detach my-volume-name [droplet_id]
+```
+*Note: Volumes cannot be detached from protected droplets.*
+
+#### Delete a Volume
+
+```bash
+dom volume delete [volume_id]
+```
+*Note: Protected volumes cannot be deleted.*
+
+#### List Volumes
+
+```bash
+dom volume list
+```
+
+#### Get Volume Information
+
+```bash
+dom volume info [volume_id]
+```
+
+#### List Volume Templates
+
+```bash
+dom volume templates
+```
+This lists available templates defined in the `volumes/` directory.
+
+### SSH Key Management
+
+#### List SSH Keys
+
+```bash
+dom key list
+```
+
+#### Get SSH Key Information
+
+```bash
+dom key info [ssh_key_id]
+```
+
+### Reserved IP Management
+
+#### List Reserved IPs
+
+```bash
+dom ip list
+```
+
+#### Assign/Unassign a Reserved IP
+
+```bash
+# Assign a reserved IP to a droplet
+dom ip assign [reserved_ip_address] [droplet_id]
+
+# Unassign a reserved IP
+dom ip unassign [reserved_ip_address]
+```
+
+### Action Management
+
+#### Get Action Information
+
+Actions represent events like droplet creation or volume attachment. You can track their status.
+
+```bash
+dom action info [action_id]
+```
+The `action_id` is typically returned when you perform an action like creating a droplet.
+
+### Other Commands
+
+#### Initialize Project
+
+As shown in the Workflow section, initialize a new project structure:
+
+```bash
+dom init
+```
+
+#### Show Version
+
+```bash
+dom version
+```
 
 ---
 
